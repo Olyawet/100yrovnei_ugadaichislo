@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <title>Угадай число - 100 уровней</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Угадай число - 100 уровней</h1>
+            <p>Прогрессивная игра с разблокировкой уровней и системой рекордов</p>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <h3>Общий счет</h3>
+                <p id="total-score">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Игр сыграно</h3>
+                <p id="games-played">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Прогресс</h3>
+                <p id="progress">0/100</p>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">
+            Прогресс: 0/100 уровней (0.0%)
+        </div>
+
+        <div id="levels-container">
+            <!-- Уровни будут добавлены через JavaScript -->
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="showStatistics()">📊 Статистика</button>
+            <button class="nav-button" onclick="showLeaderboard()">🏆 Таблица лидеров</button>
+            <button class="nav-button" onclick="showRules()">📖 Правила</button>
+            <button class="nav-button danger" onclick="resetProgress()">🔄 Сбросить прогресс</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно для ввода ника -->
+    <div id="nickname-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👤 Введите ваш ник</h2>
+            </div>
+            <div class="nickname-content">
+                <p>Введите уникальный ник для сохранения ваших результатов и участия в таблице лидеров:</p>
+                <div class="nickname-form">
+                    <input type="text" id="nickname-input" class="nickname-input" placeholder="Введите ник (3-15 символов)" maxlength="15" minlength="3">
+                    <button type="button" class="nickname-button" onclick="saveNickname()">Начать игру</button>
+                </div>
+                <p class="nickname-info">Ник будет использоваться для сохранения прогресса и отображения в таблице лидеров</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="game-title">🎯 Уровень 1</h2>
+                <span class="close" onclick="closeGameModal()">&times;</span>
+            </div>
+            <div class="game-area">
+                <div class="input-section">
+                    <h3>Введите вашу догадку</h3>
+                    <div class="guess-form">
+                        <input type="number" id="guess-input" class="guess-input" placeholder="Введите целое число" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                        <button type="button" class="guess-button" onclick="makeGuess()">Угадать!</button>
+                    </div>
+                </div>
+                <div class="history-section">
+                    <h3>История догадок</h3>
+                    <div class="guess-history" id="guess-history">
+                        <p style="color: #666; text-align: center; font-style: italic;">Пока нет догадок</p>
+                    </div>
+                </div>
+            </div>
+            <div class="game-info">
+                <div class="info-card">
+                    <h3>Попыток осталось</h3>
+                    <p id="attempts-left">15</p>
+                </div>
+                <div class="info-card">
+                    <h3>Диапазон</h3>
+                    <p id="range">1-15</p>
+                </div>
+                <div class="info-card">
+                    <h3>Лучший счет</h3>
+                    <p id="best-score">Нет</p>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-button" onclick="closeGameModal()">🏠 Главная</button>
+                <button class="nav-button" onclick="showStatistics()">📊 Статистика</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statistics-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Статистика игры</h2>
+                <span class="close" onclick="closeStatisticsModal()">&times;</span>
+            </div>
+            <div id="statistics-content">
+                <!-- Статистика будет добавлена через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏆 Таблица лидеров</h2>
+                <span class="close" onclick="closeLeaderboardModal()">&times;</span>
+            </div>
+            <div id="leaderboard-content">
+                <!-- Таблица лидеров будет добавлена через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div id="rules-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📖 Правила игры</h2>
+                <span class="close" onclick="closeRulesModal()">&times;</span>
+            </div>
+            <div class="rules-content">
+                <div class="section">
+                    <h3>🎯 Цель игры</h3>
+                    <p>Угадайте загаданное компьютером число за ограниченное количество попыток. После каждой догадки вы получите подсказку: больше или меньше загаданное число. Пройдите все 100 уровней, постепенно увеличивая сложность!</p>
+                </div>
+                
+                <div class="rules-list">
+                    <h3>📋 Основные правила</h3>
+                    <ul>
+                        <li>Компьютер загадывает случайное число в заданном диапазоне</li>
+                        <li>У вас есть ограниченное количество попыток для угадывания</li>
+                        <li>После каждой догадки вы получаете подсказку</li>
+                        <li>Игра заканчивается, когда вы угадаете число или закончатся попытки</li>
+                        <li>Числа вводятся только целые, без дробных частей</li>
+                        <li>Уровни разблокируются последовательно после прохождения предыдущего</li>
+                        <li>Ваш прогресс сохраняется автоматически</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>🎮 Система уровней</h3>
+                    <p>Игра состоит из 100 уровней, разделенных на 5 категорий сложности:</p>
+                    <table class="difficulty-table">
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Уровни</th>
+                                <th>Диапазон чисел</th>
+                                <th>Попыток</th>
+                                <th>Описание</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Новичок</strong></td>
+                                <td>1-20</td>
+                                <td>1-110</td>
+                                <td>15-13</td>
+                                <td>Идеально для начинающих</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ученик</strong></td>
+                                <td>21-40</td>
+                                <td>1-220</td>
+                                <td>12-10</td>
+                                <td>Стандартный уровень сложности</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Мастер</strong></td>
+                                <td>41-60</td>
+                                <td>1-350</td>
+                                <td>9-7</td>
+                                <td>Для опытных игроков</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Эксперт</strong></td>
+                                <td>61-80</td>
+                                <td>1-500</td>
+                                <td>6-4</td>
+                                <td>Очень сложные уровни</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Легенда</strong></td>
+                                <td>81-100</td>
+                                <td>1-700</td>
+                                <td>3-2</td>
+                                <td>Экстремальная сложность</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="scoring-section">
+                    <h3>🏆 Система очков</h3>
+                    <ul>
+                        <li><strong>Базовые очки:</strong> Номер уровня × 5</li>
+                        <li><strong>Бонус за попытки:</strong> Оставшиеся попытки × 10</li>
+                        <li><strong>Общая формула:</strong> (Оставшиеся попытки × 10) + (Номер уровня × 5)</li>
+                        <li><strong>Рекорды:</strong> Лучший результат для каждого уровня сохраняется</li>
+                        <li><strong>Общий счет:</strong> Сумма всех заработанных очков</li>
+                    </ul>
+                </div>
+
+                <div class="tips-section">
+                    <h3>💡 Советы для игры</h3>
+                    <ul>
+                        <li>Используйте стратегию "разделяй и властвуй" - начинайте с середины диапазона</li>
+                        <li>Запоминайте предыдущие догадки и их результаты</li>
+                        <li>Не тратьте попытки на числа за пределами возможного диапазона</li>
+                        <li>Анализируйте подсказки для сужения области поиска</li>
+                        <li>На сложных уровнях будьте особенно внимательны к каждой попытке</li>
+                        <li>Попробуйте улучшить свои рекорды на уже пройденных уровнях</li>
+                        <li>Следите за общим прогрессом в статистике</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
